@@ -1,0 +1,793 @@
+```html
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loop Culture | Rhythmic Texture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Montaser Arabic"', 'Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            300: '#d6d3d1',
+                            400: '#a8a29e',
+                            500: '#78716c',
+                            600: '#57534e',
+                            700: '#44403c',
+                            800: '#292524',
+                            900: '#1c1917',
+                        },
+                        brand: {
+                            dark: '#25211e',
+                            accent: '#3d3129'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #f0eee9; 
+            color: #1c1917;
+        }
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col selection:bg-stone-900 selection:text-white">
+    <div class="noise-overlay"></div>
+
+    <!-- Maker Login Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-[#f0eee9] p-8 rounded-sm shadow-2xl w-full max-w-sm border border-stone-300 transform scale-95 transition-transform duration-300" id="login-panel">
+            <h3 class="text-2xl font-display font-bold text-black mb-2">Maker Access</h3>
+            <p class="text-stone-600 text-sm mb-6">Enter your PIN to securely access the production dashboard.</p>
+            <input type="password" id="maker-pin" onkeypress="if(event.key === 'Enter') attemptLogin()" class="w-full bg-transparent border border-stone-300 focus:border-black outline-none px-4 py-3 text-center tracking-[0.5em] text-lg mb-4 rounded-sm" placeholder="••••">
+            <p id="login-error" class="text-red-600 text-xs font-bold mb-4 hidden uppercase tracking-wide">Incorrect PIN</p>
+            <div class="flex gap-3">
+                <button onclick="closeLoginModal()" class="w-1/3 border border-stone-300 text-stone-600 hover:bg-stone-200 transition-colors py-3 rounded-sm text-sm font-bold uppercase tracking-widest">Cancel</button>
+                <button onclick="attemptLogin()" class="w-2/3 bg-black text-white hover:bg-stone-800 transition-colors py-3 rounded-sm text-sm font-bold uppercase tracking-widest">Enter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms & Conditions Modal -->
+    <div id="terms-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-[#f0eee9] p-8 rounded-sm shadow-2xl w-full max-w-lg border border-stone-300 transform scale-95 transition-transform duration-300 relative max-h-[80vh] overflow-y-auto" id="terms-panel">
+            <button onclick="closeTermsModal()" class="absolute top-4 right-4 text-stone-500 hover:text-black transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-2xl font-display font-bold text-black mb-4">Terms & Conditions</h3>
+            <div class="text-stone-600 text-sm space-y-4 mb-6">
+                <p><strong>1. Deposits:</strong> A 50% non-refundable deposit is required before any crochet work begins. This covers initial material costs and secures your spot on the production timeline.</p>
+                <p><strong>2. Handmade Variances:</strong> All items are individually hand-crocheted. Minor variations in tension, exact sizing, and color pooling are natural characteristics of handmade art and are not considered defects.</p>
+                <p><strong>3. Timelines:</strong> Estimated completion dates are targets based on current capacity. While we strive to meet these dates, complex custom requests or material delays may adjust the timeline.</p>
+            </div>
+            <button onclick="closeTermsModal()" class="w-full bg-black text-white hover:bg-stone-800 transition-colors py-3 rounded-sm text-sm font-bold uppercase tracking-widest">I Understand</button>
+        </div>
+    </div>
+
+    <nav class="fixed w-full z-40 bg-[#f0eee9]/90 backdrop-blur-md border-b border-stone-300/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-24">
+                <div class="flex-shrink-0 flex items-center gap-4">
+                    <img src="1000378578.webp" alt="Loop Culture Logo" class="h-16 w-16 object-contain rounded-sm" onerror="this.src='https://placehold.co/100x100/e7e5e4/1c1917?text=LC'">
+                    <div class="flex flex-col justify-center pt-1">
+                        <span class="font-display text-xl tracking-[0.15em] font-bold text-black leading-none mb-1">LOOP CULTURE</span>
+                        <span class="font-display text-[0.65rem] tracking-[0.1em] text-stone-600 uppercase font-medium leading-none">Rhythmic Texture</span>
+                    </div>
+                </div>
+                
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-center space-x-8">
+                        <a href="#home" class="text-stone-600 hover:text-black transition-colors px-3 py-2 text-sm font-medium tracking-wide">Home</a>
+                        <a href="#about" class="text-stone-600 hover:text-black transition-colors px-3 py-2 text-sm font-medium tracking-wide">The Vision</a>
+                        <a href="#collection" class="text-stone-600 hover:text-black transition-colors px-3 py-2 text-sm font-medium tracking-wide">Collection</a>
+                        <a href="#custom-order" class="bg-black hover:bg-stone-800 text-white px-6 py-2.5 rounded-sm text-sm font-medium tracking-wider transition-all">Order Form</a>
+                        <button onclick="showLoginModal()" class="text-brand-accent hover:text-black transition-colors px-3 py-2 text-xs font-display uppercase tracking-widest border border-stone-300 rounded-sm">Maker Area</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow pt-24">
+        
+        <!-- Public Facing Storefront -->
+        <div id="public-view">
+            
+            <section id="home" class="relative overflow-hidden py-32 sm:py-48 flex items-center justify-center min-h-[85vh]">
+                <div class="text-center px-4 relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center">
+                    <h1 class="text-5xl md:text-7xl font-display font-bold text-black mb-4 tracking-wider uppercase leading-tight">
+                        Rhythmic Texture <br>
+                        <span class="font-light italic text-stone-600 text-3xl md:text-5xl capitalize">Crochet Design</span>
+                    </h1>
+                    <p class="mt-6 text-lg md:text-xl text-stone-600 max-w-2xl mx-auto font-sans font-light leading-relaxed mb-10">
+                        Discover a collection where organic patterns meet structured design. Loop Culture specializes in handcrafted crochet apparel and accessories, beginning with our signature mini 'Coral Loop' bucket bag and bespoke amigurumi keychains.
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4 w-full sm:w-auto">
+                        <a href="#collection" class="bg-black text-white font-medium py-4 px-10 rounded-sm hover:bg-stone-800 transition-colors tracking-widest text-sm uppercase text-center">
+                            View Collection
+                        </a>
+                        <a href="#about" class="border border-stone-400 text-black font-medium py-4 px-10 rounded-sm hover:bg-stone-200 transition-colors tracking-widest text-sm uppercase text-center">
+                            Our Story
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="about" class="py-24 bg-stone-100 border-y border-stone-300/50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl md:text-4xl font-display font-bold uppercase tracking-wider text-black">The Vision</h2>
+                        <div class="w-16 h-px bg-black mx-auto mt-6"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                        <div class="p-8 border border-stone-300 bg-[#f0eee9] hover:border-black transition-colors group">
+                            <div class="w-12 h-12 border border-black flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            </div>
+                            <h3 class="text-lg font-display font-bold mb-3 uppercase tracking-wide">The Loop</h3>
+                            <p class="text-stone-600 font-light leading-relaxed text-sm">Every piece begins with a single crochet loop, growing stitch by stitch into a structured, wearable work of art.</p>
+                        </div>
+
+                        <div class="p-8 border border-stone-300 bg-[#f0eee9] hover:border-black transition-colors group">
+                            <div class="w-12 h-12 border border-black flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                            </div>
+                            <h3 class="text-lg font-display font-bold mb-3 uppercase tracking-wide">Tactile Accessories</h3>
+                            <p class="text-stone-600 font-light leading-relaxed text-sm">We believe accessories should be felt. The rhythmic textures in our bags and keychains invite touch and physical connection.</p>
+                        </div>
+
+                        <div class="p-8 border border-stone-300 bg-[#f0eee9] hover:border-black transition-colors group">
+                            <div class="w-12 h-12 border border-black flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <h3 class="text-lg font-display font-bold mb-3 uppercase tracking-wide">Global Roots</h3>
+                            <p class="text-stone-600 font-light leading-relaxed text-sm">Drawing inspiration from traditional weaving techniques worldwide, reimagined for a modern canvas.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="collection" class="py-24 bg-[#f0eee9]">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl md:text-4xl font-display font-bold uppercase tracking-wider text-black">Selected Works</h2>
+                        <div class="w-16 h-px bg-black mx-auto mt-6"></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="group cursor-pointer">
+                            <div class="aspect-[4/5] bg-stone-200 overflow-hidden relative mb-4">
+                                <img src="https://placehold.co/800x1000/e7e5e4/1c1917?text=Coral+Loop+Bag" alt="Mini Coral Loop Bucket Bag" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            </div>
+                            <h4 class="font-display font-bold uppercase tracking-widest text-sm">Mini 'Coral Loop' Bucket Bag</h4>
+                            <p class="text-stone-500 text-xs tracking-wide mt-1">Signature Drawstring • Premium Cotton</p>
+                        </div>
+                        <div class="group cursor-pointer md:mt-16">
+                            <div class="aspect-[4/5] bg-stone-200 overflow-hidden relative mb-4">
+                                <img src="https://placehold.co/800x1000/e7e5e4/1c1917?text=Amigurumi+Keychain" alt="Amigurumi Keychain" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            </div>
+                            <h4 class="font-display font-bold uppercase tracking-widest text-sm">Custom Amigurumi Keychains</h4>
+                            <p class="text-stone-500 text-xs tracking-wide mt-1">Bespoke Miniature Art • Acrylic Blend</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="custom-order" class="py-24 bg-stone-50 border-t border-stone-300/50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    
+                    <div class="mb-16">
+                        <h2 class="text-4xl md:text-5xl font-display font-bold text-black mb-4">Bespoke Hand-<br>Crocheted Creations</h2>
+                        <p class="text-stone-600 font-light max-w-xl text-lg">Configure your custom bags and accessories below. Select options to see live dynamic pricing and estimated delivery timelines.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+                        
+                        <!-- Left: Form Fields -->
+                        <div class="lg:col-span-2 bg-white p-6 md:p-10 shadow-sm border border-stone-200 rounded-lg">
+                            <form id="order-form" class="space-y-12">
+                                
+                                <!-- Step 1: Contact Details -->
+                                <div>
+                                    <div class="flex items-center gap-4 mb-8 border-b border-stone-200 pb-4">
+                                        <div class="w-8 h-8 rounded-full bg-[#f0eee9] text-stone-800 flex items-center justify-center font-display font-bold text-sm">1</div>
+                                        <h3 class="text-2xl font-display font-bold text-black">Contact Details</h3>
+                                    </div>
+                                    
+                                    <div class="space-y-6">
+                                        <div>
+                                            <label class="block text-xs font-display uppercase tracking-widest text-stone-700 mb-2 font-bold">Full Name *</label>
+                                            <input type="text" required class="w-full bg-white border border-stone-300 focus:border-black outline-none px-4 py-3 transition-colors text-black placeholder-stone-400 rounded-md" placeholder="e.g. Jane Doe">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-display uppercase tracking-widest text-stone-700 mb-2 font-bold">Email Address *</label>
+                                            <input type="email" required class="w-full bg-white border border-stone-300 focus:border-black outline-none px-4 py-3 transition-colors text-black placeholder-stone-400 rounded-md" placeholder="jane@example.com">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-display uppercase tracking-widest text-stone-700 mb-2 font-bold">Phone / WhatsApp *</label>
+                                            <input type="tel" required class="w-full bg-white border border-stone-300 focus:border-black outline-none px-4 py-3 transition-colors text-black placeholder-stone-400 rounded-md" placeholder="+264 81 123 4567">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-display uppercase tracking-widest text-stone-700 mb-2 font-bold">Delivery Method</label>
+                                            <select id="shipping" onchange="calculatePrice()" class="w-full bg-white border border-stone-300 focus:border-black outline-none px-4 py-3 transition-colors text-black rounded-md appearance-none">
+                                                <option value="0" data-label="Studio Collection">Studio Collection (Free)</option>
+                                                <option value="150" data-label="Local Delivery">Local Delivery</option>
+                                                <option value="450" data-label="International Shipping">International Shipping</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-display uppercase tracking-widest text-stone-700 mb-2 font-bold">Shipping / Delivery Address *</label>
+                                            <textarea required rows="2" class="w-full bg-white border border-stone-300 focus:border-black outline-none px-4 py-3 transition-colors text-black placeholder-stone-400 rounded-md resize-none" placeholder="Street name, suburb, city, postal code"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: Customization -->
+                                <div>
+                                    <div class="flex items-center gap-4 mb-8 border-b border-stone-200 pb-4 pt-4">
+                                        <div class="w-8 h-8 rounded-full bg-[#f0eee9] text-stone-800 flex items-center justify-center font-display font-bold text-sm">2</div>
+                                        <h3 class="text-2xl font-display font-bold text-black">Customization Options</h3>
+                                    </div>
+
+                                    <div class="space-y-6">
+                                        <div>
+                                            <label class="block text-xs font-display uppercase tracking-widest text-stone-700 mb-2 font-bold">Select Base Item *</label>
+                                            <select id="base-item" onchange="calculatePrice()" class="w-full bg-white border border-stone-300 focus:border-black outline-none px-4 py-3 transition-colors text-black rounded-md appearance-none">
+                                                <option value="0" data-hours="0" data-label="Choose a creation..." disabled selected>Choose a creation...</option>
+                                                <option value="850" data-hours="10" data-label="Mini 'Coral Loop' Bucket Bag">Mini 'Coral Loop' Bucket Bag</option>
+                                                <option value="350" data-hours="3" data-label="Custom Amigurumi Keychain">Custom Amigurumi Keychain</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-display uppercase tracking-widest text-stone-700 mb-2 font-bold">Sizing / Measurements</label>
+                                            <select id="sizing" onchange="calculatePrice()" class="w-full bg-white border border-stone-300 focus:border-black outline-none px-4 py-3 transition-colors text-black rounded-md appearance-none">
+                                                <option value="0" data-label="Standard / Accessory Size">Standard / Accessory Size</option>
+                                                <option value="150" data-label="Oversized / Extended Strap">Oversized / Extended Strap</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-display uppercase tracking-widest text-stone-700 mb-2 font-bold">Yarn & Color Palette Selection</label>
+                                            <select id="yarn" onchange="calculatePrice()" class="w-full bg-white border border-stone-300 focus:border-black outline-none px-4 py-3 transition-colors text-black rounded-md appearance-none">
+                                                <option value="0" data-label="Standard Soft Acrylic Blend">Standard Soft Acrylic Blend</option>
+                                                <option value="200" data-label="Premium Recycled Cotton">Premium Recycled Cotton</option>
+                                                <option value="450" data-label="Luxury Merino/Silk Blend">Luxury Merino/Silk Blend</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-xs font-display uppercase tracking-widest text-stone-700 mb-3 font-bold">Hardware & Custom Add-ons</label>
+                                            <div class="space-y-3">
+                                                <label class="flex items-center p-4 border border-stone-300 rounded-md cursor-pointer hover:border-black transition-colors">
+                                                    <input type="checkbox" class="addon-checkbox w-5 h-5 accent-black text-black border-stone-300 rounded" value="120" data-hours="1" data-label="Custom Brand Tag & Chicago Screws" onchange="calculatePrice()">
+                                                    <span class="ml-3 text-sm text-stone-800 addon-label">Custom Brand Tag & Chicago Screws</span>
+                                                </label>
+                                                <label class="flex items-center p-4 border border-stone-300 rounded-md cursor-pointer hover:border-black transition-colors">
+                                                    <input type="checkbox" class="addon-checkbox w-5 h-5 accent-black text-black border-stone-300 rounded" value="250" data-hours="1" data-label="Genuine Leather Drawstring / Straps" onchange="calculatePrice()">
+                                                    <span class="ml-3 text-sm text-stone-800 addon-label">Genuine Leather Drawstring / Straps</span>
+                                                </label>
+                                                <label class="flex items-center p-4 border border-stone-300 rounded-md cursor-pointer hover:border-black transition-colors">
+                                                    <input type="checkbox" class="addon-checkbox w-5 h-5 accent-black text-black border-stone-300 rounded" value="300" data-hours="3" data-label="Intricate Surface Embroidery / Accent Stitching" onchange="calculatePrice()">
+                                                    <span class="ml-3 text-sm text-stone-800 addon-label">Intricate Surface Embroidery / Accent Stitching</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-display uppercase tracking-widest text-stone-700 mb-2 font-bold">Color Palette & Custom Requests</label>
+                                            <textarea required rows="4" class="w-full bg-white border border-stone-300 focus:border-black outline-none px-4 py-3 transition-colors text-black placeholder-stone-400 rounded-md resize-none" placeholder="Specify your desired color combinations, exact measurements, or specific preferences..."></textarea>
+                                        </div>
+
+                                        <div class="bg-stone-50 p-5 rounded-md border border-stone-200">
+                                            <label class="flex items-start cursor-pointer">
+                                                <input type="checkbox" required class="mt-1 w-5 h-5 accent-black text-black border-stone-400 rounded">
+                                                <span class="ml-3 text-sm text-stone-700 leading-relaxed">
+                                                    I agree to the <button type="button" onclick="showTermsModal()" class="underline font-bold text-black hover:text-stone-600">Loop Culture Terms & Conditions</button>. I understand that a <strong>50% non-refundable deposit</strong> is required to start work and handmade goods have minor, unique variances. *
+                                                </span>
+                                            </label>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <button type="button" class="w-full bg-[#3d3129] text-white font-medium py-5 px-6 rounded-md hover:bg-black transition-colors tracking-widest text-sm uppercase flex items-center justify-center gap-2">
+                                    Submit Order & Generate Official Invoice
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                </button>
+
+                            </form>
+                        </div>
+
+                        <!-- Right: Live Order Estimate Panel -->
+                        <div class="lg:sticky lg:top-32 bg-brand-dark text-stone-200 p-8 rounded-xl shadow-2xl relative overflow-hidden">
+                            <div class="absolute -top-24 -right-24 w-64 h-64 bg-brand-accent/30 rounded-full blur-3xl pointer-events-none"></div>
+                            
+                            <div class="relative z-10">
+                                <div class="flex justify-between items-start mb-8">
+                                    <h3 class="text-3xl font-display font-bold text-white">Live Order<br>Estimate</h3>
+                                    <div class="flex flex-col items-end gap-2">
+                                        <span class="bg-brand-accent text-stone-200 text-xs py-1 px-3 rounded-full font-mono tracking-wider">LC-2026-XXXX</span>
+                                        <!-- Dynamic Currency Selector -->
+                                        <select id="currency" onchange="updateCurrencyDisplay()" class="bg-[#1a1715] text-stone-200 border border-stone-600 outline-none px-2 py-1.5 text-xs rounded-sm cursor-pointer hover:border-stone-400 transition-colors">
+                                            <option value="NAD" selected>NAD (N$)</option>
+                                            <option value="USD">USD ($)</option>
+                                            <option value="EUR">EUR (€)</option>
+                                            <option value="GBP">GBP (£)</option>
+                                            <option value="ZAR">ZAR (R)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4 text-sm font-light border-b border-stone-700 pb-6 mb-6">
+                                    <div class="flex justify-between">
+                                        <span class="text-stone-400">Selected Base</span>
+                                        <span id="rec-base" class="text-white">N$0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-stone-400">Sizing Adjustment</span>
+                                        <span id="rec-sizing" class="text-white">N$0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-stone-400">Yarn Selection</span>
+                                        <span id="rec-yarn" class="text-white">N$0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-stone-400">Hardware & Add-ons</span>
+                                        <span id="rec-addons" class="text-white">N$0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-stone-400">Shipping / Delivery</span>
+                                        <span id="rec-shipping" class="text-white">N$0</span>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3 text-sm border-b border-stone-700 pb-6 mb-6">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-stone-400">Estimated Craft Time:</span>
+                                        <span id="rec-hours" class="text-white font-mono bg-stone-800 px-2 py-0.5 rounded">0 hrs</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-stone-400">Target Completion Date:</span>
+                                        <span id="rec-date" class="text-white font-mono bg-stone-800 px-2 py-0.5 rounded">TBD</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-stone-500 text-xs tracking-widest uppercase">Total Price</span>
+                                    <span id="rec-total" class="text-5xl font-display font-bold text-white leading-none">N$0</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm text-stone-400">
+                                    <span>Required 50% Deposit:</span>
+                                    <span id="rec-deposit" class="text-white font-medium">N$0</span>
+                                </div>
+
+                                <div class="mt-8 flex items-start gap-2 text-xs text-stone-500 leading-tight">
+                                    <svg class="w-4 h-4 flex-shrink-0 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                    <p>Prices update dynamically based on option selections and active exchange rates.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </div> <!-- End of Public View -->
+
+        <!-- Private Maker Dashboard (Hidden by Default) -->
+        <div id="maker-view" class="hidden">
+            <section id="maker-dashboard" class="py-12 bg-white min-h-screen">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    
+                    <div class="flex justify-between items-end mb-10 border-b border-stone-200 pb-6">
+                        <div>
+                            <h2 class="text-3xl md:text-4xl font-display font-bold text-black">Maker Production Dashboard</h2>
+                            <p class="text-stone-600 text-sm mt-2 max-w-2xl">Manage workload, adjust capacity for schedule changes, and track active client orders.</p>
+                        </div>
+                        <button onclick="logoutMaker()" class="hidden md:flex items-center gap-2 text-stone-500 hover:text-black transition-colors text-sm font-bold uppercase tracking-widest">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                            Lock & Exit
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="border border-stone-200 rounded-md p-4 bg-stone-50">
+                            <label class="block text-xs font-display uppercase tracking-widest text-stone-600 mb-1">Daily Work Limit</label>
+                            <div class="flex items-center">
+                                <input type="number" id="daily-limit" value="4" onchange="calculatePrice()" class="w-16 bg-white border border-stone-300 outline-none px-2 py-1 text-center text-sm rounded-sm font-bold">
+                                <span class="ml-2 text-sm text-stone-500">hrs/day</span>
+                            </div>
+                        </div>
+                        <div class="border border-stone-200 rounded-md p-4 bg-stone-50 flex-grow md:col-span-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </div>
+                                <div class="flex-grow">
+                                    <label class="block text-xs font-display uppercase tracking-widest text-stone-600 mb-1">Status / Adjustments</label>
+                                    <select class="w-full bg-white border border-stone-300 outline-none px-3 py-1.5 text-sm rounded-sm">
+                                        <option>Normal Operations</option>
+                                        <option>Reduced Capacity (Sourcing supplies)</option>
+                                        <option>Waitlist Only (Fully Booked)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <button class="w-full bg-[#3d3129] text-white text-sm font-medium py-4 rounded-md hover:bg-black transition-colors flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Manual Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="border-b border-stone-200 mb-8 flex overflow-x-auto">
+                        <button id="tab-btn-kanban" onclick="switchDashboardTab('kanban')" class="px-6 py-4 text-sm font-display font-bold uppercase tracking-widest border-b-2 border-[#3d3129] text-black whitespace-nowrap transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                            Kanban Workflow
+                        </button>
+                        <button id="tab-btn-timeline" onclick="switchDashboardTab('timeline')" class="px-6 py-4 text-sm font-display uppercase tracking-widest border-b-2 border-transparent text-stone-400 hover:text-stone-700 whitespace-nowrap transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Production Timeline Calendar
+                        </button>
+                    </div>
+
+                    <!-- Tab Content: Kanban Workflow -->
+                    <div id="tab-content-kanban" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Column: To Do -->
+                        <div class="bg-stone-50 rounded-md p-4 border border-stone-200">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-display font-bold uppercase text-xs tracking-widest text-stone-500 flex items-center gap-2">
+                                    <svg class="w-3 h-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>
+                                    Deposit Pend. (1)
+                                </h4>
+                            </div>
+                            <div class="bg-white border border-stone-200 p-4 rounded shadow-sm mb-3 cursor-grab hover:border-stone-400 transition-colors opacity-75">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-xs font-mono text-stone-400">LC-2026-4410</span>
+                                    <span class="bg-orange-100 text-orange-800 text-[0.65rem] font-bold px-2 py-0.5 rounded uppercase tracking-widest">Wait</span>
+                                </div>
+                                <h5 class="font-bold text-sm text-black">Michael Ross</h5>
+                                <p class="text-xs text-stone-500 mt-1">Custom Amigurumi Keychain</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Column: In Production -->
+                        <div class="bg-stone-50 rounded-md p-4 border border-stone-200">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-display font-bold uppercase text-xs tracking-widest text-stone-500 flex items-center gap-2">
+                                    <svg class="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path></svg>
+                                    Production (1)
+                                </h4>
+                            </div>
+                            <div class="bg-white border border-stone-200 p-4 rounded shadow-sm mb-3 cursor-grab border-l-4 border-l-[#3d3129] hover:border-r-stone-400 hover:border-y-stone-400 transition-colors">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-xs font-mono text-stone-400">LC-2026-8912</span>
+                                    <span class="bg-stone-200 text-stone-700 text-[0.65rem] font-bold px-2 py-0.5 rounded uppercase tracking-widest">WIP</span>
+                                </div>
+                                <h5 class="font-bold text-sm text-black">Sarah Jenkins</h5>
+                                <p class="text-xs text-stone-500 mt-1">Mini 'Coral Loop' Bucket Bag</p>
+                                <div class="w-full bg-stone-200 h-1.5 rounded-full mt-4 overflow-hidden">
+                                    <div class="bg-[#3d3129] h-full w-2/3"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column: Ready / Shipped -->
+                        <div class="bg-stone-50 rounded-md p-4 border border-stone-200">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-display font-bold uppercase text-xs tracking-widest text-stone-500 flex items-center gap-2">
+                                    <svg class="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                    Completed (0)
+                                </h4>
+                            </div>
+                            <div class="border-2 border-dashed border-stone-300 rounded p-6 flex items-center justify-center text-stone-400 text-sm font-medium">
+                                Drop items here
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Timeline/Targets -->
+                    <div id="tab-content-timeline" class="hidden grid-cols-1 lg:grid-cols-3 gap-8">
+                        
+                        <div class="lg:col-span-1">
+                            <h3 class="text-2xl font-display font-bold text-black leading-tight mb-2">Scheduled Delivery Targets</h3>
+                            <p class="text-sm font-mono text-stone-500 mb-6">Calculated from workload backlog & daily capacity.</p>
+                        </div>
+
+                        <div class="lg:col-span-2 space-y-4">
+                            <div class="border border-stone-200 p-5 rounded-md flex flex-col sm:flex-row gap-5 items-start sm:items-center bg-white shadow-sm hover:border-stone-400 transition-colors">
+                                <div class="w-10 h-10 bg-[#f0eee9] rounded-full flex items-center justify-center flex-shrink-0 text-[#3d3129]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                </div>
+                                <div class="flex-grow">
+                                    <h4 class="font-bold text-black text-lg">Sarah Jenkins <span class="text-stone-400 font-mono text-sm font-normal">(LC-2026-8912)</span></h4>
+                                    <p class="text-sm text-stone-600 mt-1">Mini 'Coral Loop' Bucket Bag + Leather Drawstring • 11 craft hours</p>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div class="text-stone-800 font-mono font-bold mb-1">2026-10-18</div>
+                                    <span class="inline-block bg-stone-200 text-stone-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-widest">Production</span>
+                                </div>
+                            </div>
+
+                            <div class="border border-stone-200 p-5 rounded-md flex flex-col sm:flex-row gap-5 items-start sm:items-center bg-white shadow-sm hover:border-stone-400 transition-colors opacity-75">
+                                <div class="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center flex-shrink-0 text-orange-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+                                </div>
+                                <div class="flex-grow">
+                                    <h4 class="font-bold text-black text-lg">Michael Ross <span class="text-stone-400 font-mono text-sm font-normal">(LC-2026-4410)</span></h4>
+                                    <p class="text-sm text-stone-600 mt-1">Custom Amigurumi Keychain + Custom Tag • 4 craft hours</p>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <div class="text-stone-800 font-mono font-bold mb-1">2026-10-22</div>
+                                    <span class="inline-block bg-orange-100 text-orange-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-widest">Deposit Pend.</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </section>
+        </div> <!-- End of Maker View -->
+
+    </main>
+
+    <script>
+        function showLoginModal() {
+            const modal = document.getElementById('login-modal');
+            const panel = document.getElementById('login-panel');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                panel.classList.remove('scale-95');
+                document.getElementById('maker-pin').focus();
+            }, 10);
+        }
+
+        function closeLoginModal() {
+            const modal = document.getElementById('login-modal');
+            const panel = document.getElementById('login-panel');
+            modal.classList.add('opacity-0');
+            panel.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.getElementById('maker-pin').value = '';
+                document.getElementById('login-error').classList.add('hidden');
+            }, 300);
+        }
+
+        function attemptLogin() {
+            const pin = document.getElementById('maker-pin').value;
+            // SECURE PIN FOR PREVIEW: 1234
+            if (pin === '1234' || pin === 'admin') {
+                closeLoginModal();
+                document.getElementById('public-view').classList.add('hidden');
+                document.getElementById('maker-view').classList.remove('hidden');
+                window.scrollTo(0, 0);
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        function logoutMaker() {
+            document.getElementById('maker-view').classList.add('hidden');
+            document.getElementById('public-view').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function showTermsModal() {
+            const modal = document.getElementById('terms-modal');
+            const panel = document.getElementById('terms-panel');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                panel.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeTermsModal() {
+            const modal = document.getElementById('terms-modal');
+            const panel = document.getElementById('terms-panel');
+            modal.classList.add('opacity-0');
+            panel.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function switchDashboardTab(tab) {
+            const btnKanban = document.getElementById('tab-btn-kanban');
+            const btnTimeline = document.getElementById('tab-btn-timeline');
+            const contentKanban = document.getElementById('tab-content-kanban');
+            const contentTimeline = document.getElementById('tab-content-timeline');
+
+            btnKanban.className = "px-6 py-4 text-sm font-display uppercase tracking-widest border-b-2 border-transparent text-stone-400 hover:text-stone-700 whitespace-nowrap transition-colors flex items-center gap-2";
+            btnTimeline.className = "px-6 py-4 text-sm font-display uppercase tracking-widest border-b-2 border-transparent text-stone-400 hover:text-stone-700 whitespace-nowrap transition-colors flex items-center gap-2";
+            
+            contentKanban.classList.add('hidden');
+            contentTimeline.classList.add('hidden');
+            contentTimeline.classList.remove('grid');
+
+            if (tab === 'kanban') {
+                btnKanban.classList.remove('border-transparent', 'text-stone-400');
+                btnKanban.classList.add('border-[#3d3129]', 'text-black', 'font-bold');
+                contentKanban.classList.remove('hidden');
+            } else {
+                btnTimeline.classList.remove('border-transparent', 'text-stone-400');
+                btnTimeline.classList.add('border-[#3d3129]', 'text-black', 'font-bold');
+                contentTimeline.classList.remove('hidden');
+                contentTimeline.classList.add('grid');
+            }
+        }
+
+        // Base rates set relative to NAD (Namibian Dollar) = 1
+        const exchangeRates = {
+            NAD: { symbol: 'N$', rate: 1 },
+            USD: { symbol: '$', rate: 0.053 },
+            EUR: { symbol: '€', rate: 0.049 },
+            GBP: { symbol: '£', rate: 0.042 },
+            ZAR: { symbol: 'R', rate: 1 }
+        };
+
+        function formatPrice(baseValue, curr) {
+            if (baseValue === 0) return curr.symbol + '0';
+            const converted = baseValue * curr.rate;
+            return curr.symbol + (converted % 1 === 0 ? converted : converted.toFixed(2));
+        }
+
+        function updateCurrencyDisplay() {
+            const currencyCode = document.getElementById('currency').value;
+            const curr = exchangeRates[currencyCode];
+
+            // Update Dropdown Labels
+            const selects = ['shipping', 'base-item', 'sizing', 'yarn'];
+            selects.forEach(id => {
+                const select = document.getElementById(id);
+                if(!select) return;
+                Array.from(select.options).forEach(opt => {
+                    if (opt.disabled) return;
+                    const basePrice = parseFloat(opt.value);
+                    const label = opt.getAttribute('data-label');
+                    if (!label) return;
+                    
+                    if (basePrice === 0) {
+                        opt.text = label + (id === 'shipping' ? ' (Free)' : '');
+                    } else {
+                        opt.text = label + (id === 'base-item' ? ` (${formatPrice(basePrice, curr)})` : ` (+ ${formatPrice(basePrice, curr)})`);
+                    }
+                });
+            });
+
+            // Update Checkbox Labels
+            const checkboxes = document.querySelectorAll('.addon-checkbox');
+            checkboxes.forEach(box => {
+                const basePrice = parseFloat(box.value);
+                const label = box.getAttribute('data-label');
+                if (!label) return;
+                const labelElement = box.nextElementSibling;
+                labelElement.innerText = `${label} (+ ${formatPrice(basePrice, curr)})`;
+            });
+
+            // Recalculate Totals
+            calculatePrice();
+        }
+
+        function calculatePrice() {
+            const currencyCode = document.getElementById('currency') ? document.getElementById('currency').value : 'NAD';
+            const curr = exchangeRates[currencyCode];
+
+            const baseSelect = document.getElementById('base-item');
+            const sizingSelect = document.getElementById('sizing');
+            const yarnSelect = document.getElementById('yarn');
+            const shippingSelect = document.getElementById('shipping');
+            
+            const recBase = document.getElementById('rec-base');
+            const recSizing = document.getElementById('rec-sizing');
+            const recYarn = document.getElementById('rec-yarn');
+            const recAddons = document.getElementById('rec-addons');
+            const recShipping = document.getElementById('rec-shipping');
+            const recHours = document.getElementById('rec-hours');
+            const recDate = document.getElementById('rec-date');
+            const recTotal = document.getElementById('rec-total');
+            const recDeposit = document.getElementById('rec-deposit');
+
+            let basePrice = 0;
+            let baseHours = 0;
+            if(baseSelect && baseSelect.options[baseSelect.selectedIndex].value !== "0") {
+                basePrice = parseFloat(baseSelect.value);
+                baseHours = parseFloat(baseSelect.options[baseSelect.selectedIndex].getAttribute('data-hours') || 0);
+            }
+
+            const sizingPrice = parseFloat(sizingSelect ? sizingSelect.value : 0);
+            const yarnPrice = parseFloat(yarnSelect ? yarnSelect.value : 0);
+            const shippingPrice = parseFloat(shippingSelect ? shippingSelect.value : 0);
+            
+            let addonsPrice = 0;
+            let addonsHours = 0;
+            const addons = document.querySelectorAll('.addon-checkbox');
+            if(addons) {
+                addons.forEach(box => {
+                    if(box.checked) {
+                        addonsPrice += parseFloat(box.value);
+                        addonsHours += parseFloat(box.getAttribute('data-hours') || 0);
+                    }
+                });
+            }
+
+            const totalPrice = basePrice + sizingPrice + yarnPrice + addonsPrice + shippingPrice;
+            const totalHours = baseHours + addonsHours;
+
+            // Update UI
+            if(recBase) recBase.innerText = basePrice > 0 ? formatPrice(basePrice, curr) : curr.symbol + '0';
+            if(recSizing) recSizing.innerText = sizingPrice > 0 ? '+' + formatPrice(sizingPrice, curr) : curr.symbol + '0';
+            if(recYarn) recYarn.innerText = yarnPrice > 0 ? '+' + formatPrice(yarnPrice, curr) : curr.symbol + '0';
+            if(recAddons) recAddons.innerText = addonsPrice > 0 ? '+' + formatPrice(addonsPrice, curr) : curr.symbol + '0';
+            if(recShipping) recShipping.innerText = shippingPrice > 0 ? '+' + formatPrice(shippingPrice, curr) : curr.symbol + '0';
+            
+            if(recTotal) recTotal.innerText = formatPrice(totalPrice, curr);
+            if(recDeposit) recDeposit.innerText = formatPrice(totalPrice / 2, curr);
+            if(recHours) recHours.innerText = totalHours + ' hrs';
+
+            // Calculate Target Date based on workload
+            const currentBacklogHours = 10; 
+            const dailyLimitInput = document.getElementById('daily-limit');
+            const dailyLimit = dailyLimitInput ? (parseFloat(dailyLimitInput.value) || 4) : 4;
+
+            if (basePrice > 0 && recDate) {
+                const totalHoursToComplete = currentBacklogHours + totalHours;
+                const daysNeeded = Math.ceil(totalHoursToComplete / dailyLimit);
+                
+                const targetDate = new Date();
+                targetDate.setDate(targetDate.getDate() + daysNeeded);
+                
+                const options = { month: 'short', day: 'numeric', year: 'numeric' };
+                recDate.innerText = targetDate.toLocaleDateString('en-US', options);
+            } else if (recDate) {
+                recDate.innerText = 'TBD';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCurrencyDisplay();
+        });
+    </script>
+
+    <footer class="bg-black py-16 border-t border-stone-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center gap-6">
+            <div class="flex flex-col items-center gap-2">
+                <span class="font-display font-bold text-white tracking-[0.2em] text-lg">LOOP CULTURE</span>
+                <span class="font-display text-[0.6rem] tracking-[0.1em] text-stone-400 uppercase">Rhythmic Texture</span>
+            </div>
+            <p class="text-stone-500 text-xs tracking-wider mt-4">© 2026 Loop Culture. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
+```
