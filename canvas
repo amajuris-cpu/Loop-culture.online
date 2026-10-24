@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loop Culture - Interactive Business Model Canvas</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; color: #333; }
+        h1 { text-align: center; color: #111; }
+        .canvas-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(3, minmax(150px, auto));
+            gap: 10px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .box {
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .box h3 { font-size: 14px; margin-top: 0; color: #0056b3; text-transform: uppercase; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .box textarea {
+            flex-grow: 1;
+            border: none;
+            resize: none;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            background: #fafafa;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .box textarea:focus { background: #fff; box-shadow: inset 0 0 0 1px #0056b3; }
+        
+        /* Layout spanning for standard BMC layout */
+        .partners { grid-column: span 1; grid-row: span 2; }
+        .activities { grid-column: span 1; grid-row: span 1; }
+        .resources { grid-column: span 1; grid-row: span 1; }
+        .value-props { grid-column: span 1; grid-row: span 2; }
+        .relationships { grid-column: span 1; grid-row: span 1; }
+        .channels { grid-column: span 1; grid-row: span 1; }
+        .segments { grid-column: span 1; grid-row: span 2; }
+        .costs { grid-column: span 2.5; grid-row: span 1; }
+        .revenue { grid-column: span 2.5; grid-row: span 1; }
+        
+        .controls { text-align: center; margin-top: 20px; }
+        button { background: #0056b3; color: white; border: none; padding: 10px 20px; font-size: 14px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #004085; }
+    </style>
+</head>
+<body>
+
+    <h1>Loop Culture — Business Model Canvas</h1>
+    <div class="canvas-grid">
+        <div class="box partners">
+            <h3>Key Partners</h3>
+            <textarea placeholder="Add key partners..."></textarea>
+        </div>
+        <div class="box activities">
+            <h3>Key Activities</h3>
+            <textarea placeholder="Add key activities..."></textarea>
+        </div>
+        <div class="box value-props">
+            <h3>Value Propositions</h3>
+            <textarea placeholder="Add value propositions..."></textarea>
+        </div>
+        <div class="box relationships">
+            <h3>Customer Relationships</h3>
+            <textarea placeholder="Add customer relationships..."></textarea>
+        </div>
+        <div class="box segments">
+            <h3>Customer Segments</h3>
+            <textarea placeholder="Add customer segments..."></textarea>
+        </div>
+        <div class="box resources">
+            <h3>Key Resources</h3>
+            <textarea placeholder="Add key resources..."></textarea>
+        </div>
+        <div class="box channels">
+            <h3>Channels</h3>
+            <textarea placeholder="Add channels..."></textarea>
+        </div>
+        <div class="box costs" style="grid-column: span 2.5;">
+            <h3>Cost Structure</h3>
+            <textarea placeholder="Add cost structure..."></textarea>
+        </div>
+        <div class="box revenue" style="grid-column: span 2.5;">
+            <h3>Revenue Streams</h3>
+            <textarea placeholder="Add revenue streams..."></textarea>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="saveCanvas()">Save Locally</button>
+        <button onclick="clearCanvas()" style="background: #dc3545; margin-left: 10px;">Clear</button>
+    </div>
+
+    <script>
+        // Simple persistence using localStorage so notes stay when refreshing
+        const textareas = document.querySelectorAll('textarea');
+        
+        function saveCanvas() {
+            textareas.forEach((ta, index) => {
+                localStorage.setItem(`loop_culture_bmc_${index}`, ta.value);
+            });
+            alert('Canvas saved to your browser storage!');
+        }
+
+        function clearCanvas() {
+            if(confirm('Are you sure you want to clear the canvas?')) {
+                textareas.forEach((ta, index) => {
+                    ta.value = '';
+                    localStorage.removeItem(`loop_culture_bmc_${index}`);
+                });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            textareas.forEach((ta, index) => {
+                const saved = localStorage.getItem(`loop_culture_bmc_${index}`);
+                if (saved) ta.value = saved;
+            });
+        });
+    </script>
+</body>
+</html>
